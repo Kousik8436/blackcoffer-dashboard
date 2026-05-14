@@ -21,7 +21,8 @@ function SourceChart({ filters }) {
         Object.entries(filters).forEach(([k, v]) => {
           if (v && v !== 'all') params.append(k, v)
         })
-        const res = await axios.get(`/api/data/by-source?${params}`)
+        const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+        const res = await axios.get(`${API_URL}/api/data/by-source?${params}`)
         if (res.data.success && res.data.data.length > 0) {
           const items = res.data.data
           setChartData({

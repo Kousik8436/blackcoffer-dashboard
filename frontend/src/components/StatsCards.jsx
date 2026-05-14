@@ -18,11 +18,12 @@ function StatsCards({ stats, loading, filters }) {
           if (v && v !== 'all') params.append(k, v)
         })
 
+        const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
         const [topicRes, countryRes, sectorRes, regionRes] = await Promise.all([
-          axios.get(`/api/data/intensity-by-topic?${params}`),
-          axios.get(`/api/data/by-country?${params}`),
-          axios.get(`/api/data/by-sector?${params}`),
-          axios.get(`/api/data/intensity-by-region?${params}`),
+          axios.get(`${API_URL}/api/data/intensity-by-topic?${params}`),
+          axios.get(`${API_URL}/api/data/by-country?${params}`),
+          axios.get(`${API_URL}/api/data/by-sector?${params}`),
+          axios.get(`${API_URL}/api/data/intensity-by-region?${params}`),
         ])
 
         setExtraStats({

@@ -23,7 +23,8 @@ function CountryChart({ filters }) {
         Object.entries(filters).forEach(([k, v]) => {
           if (v && v !== 'all') params.append(k, v)
         })
-        const res = await axios.get(`/api/data/by-country?${params}`)
+        const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+        const res = await axios.get(`${API_URL}/api/data/by-country?${params}`)
         if (res.data.success && res.data.data.length > 0) {
           const items = res.data.data.slice(0, 8)
           setTableData(res.data.data.slice(0, 10))
