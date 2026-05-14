@@ -30,8 +30,6 @@ router.get('/filters', async (req, res) => {
 
     const clean = (arr) => arr.filter(v => v && v !== '').sort();
     
-    const cleanedSwots = clean(swots);
-
     res.json({
       success: true,
       filters: {
@@ -42,7 +40,7 @@ router.get('/filters', async (req, res) => {
         pestles: clean(pestles),
         sources: clean(sources),
         countries: clean(countries),
-        swots: cleanedSwots.length > 0 ? cleanedSwots : ['Strengths', 'Weaknesses', 'Opportunities', 'Threats'],
+        swots: clean(swots),
       }
     });
   } catch (error) {

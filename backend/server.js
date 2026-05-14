@@ -10,39 +10,92 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+let cachedConnection = null;
+
+const getDatabaseErrorMessage = (error) => {
+  if (!process.env.MONGO_URI) {
+    return 'MONGO_URI is not configured in the backend environment variables';
+  }
+
+  if (error?.name === 'MongooseServerSelectionError') {
+    return 'MongoDB server selection failed. Check your Atlas network access and connection string';
+  }
+
+  if (error?.message?.toLowerCase().includes('authentication failed')) {
+    return 'MongoDB authentication failed. Check the username and password in MONGO_URI';
+  }
+
+  return 'Database connection failed';
+};
+
 // Optimize MongoDB connection for Vercel's serverless environment
 const connectDB = async () => {
   if (mongoose.connection.readyState >= 1) return;
+
+  if (!process.env.MONGO_URI) {
+    throw new Error('Missing MONGO_URI');
+  }
+
+  if (cachedConnection) {
+    await cachedConnection;
+    return;
+  }
+
   try {
-    await mongoose.connect(process.env.MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
+    cachedConnection = mongoose.connect(process.env.MONGO_URI, {
       serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of hanging for 10s-30s
     });
+
+    await cachedConnection;
     console.log('MongoDB Connected!');
   } catch (err) {
-    console.log('MongoDB Connection Error:', err);
+    cachedConnection = null;
+    console.error('MongoDB Connection Error:', err.message);
     throw err;
   }
 };
 
-// Ensure DB is connected before handling any API requests
-app.use(async (req, res, next) => {
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Backend API is running',
+    database: mongoose.connection.readyState === 1 ? 'connected' : 'not connected',
+  });
+});
+
+app.get('/api/health', async (req, res) => {
+  try {
+    await connectDB();
+    res.json({
+      success: true,
+      message: 'Backend and database are connected',
+      database: 'connected',
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: getDatabaseErrorMessage(error),
+      database: 'not connected',
+    });
+  }
+});
+
+// Ensure DB is connected before handling data API requests
+app.use('/api/data', async (req, res, next) => {
   try {
     await connectDB();
     next();
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Database connection failed' });
+    res.status(500).json({
+      success: false,
+      message: getDatabaseErrorMessage(error),
+    });
   }
 });
 
 // Connect our routes
 const dataRoutes = require('./routes/dataRoutes');
 app.use('/api/data', dataRoutes);
-
-app.get('/', (req, res) => {
-  res.json({ message: 'Server is running!' });
-});
 
 const PORT = process.env.PORT || 5000;
 

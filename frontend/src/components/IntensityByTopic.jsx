@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Radar } from 'react-chartjs-2'
-import axios from 'axios'
+import api from '../api'
 import {
   Chart as ChartJS,
   RadialLinearScale,
@@ -25,8 +25,7 @@ function IntensityByTopic({ filters }) {
         Object.entries(filters).forEach(([k, v]) => {
           if (v && v !== 'all') params.append(k, v)
         })
-        const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
-        const res = await axios.get(`${API_URL}/api/data/intensity-by-topic?${params}`)
+        const res = await api.get(`/api/data/intensity-by-topic?${params}`)
         if (res.data.success && res.data.data.length > 0) {
           const items = res.data.data.slice(0, 10)
           setChartData({

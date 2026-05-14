@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import axios from 'axios'
+import api from '../api'
 
 function StatsCards({ stats, loading, filters }) {
 
@@ -18,12 +18,11 @@ function StatsCards({ stats, loading, filters }) {
           if (v && v !== 'all') params.append(k, v)
         })
 
-        const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
         const [topicRes, countryRes, sectorRes, regionRes] = await Promise.all([
-          axios.get(`${API_URL}/api/data/intensity-by-topic?${params}`),
-          axios.get(`${API_URL}/api/data/by-country?${params}`),
-          axios.get(`${API_URL}/api/data/by-sector?${params}`),
-          axios.get(`${API_URL}/api/data/intensity-by-region?${params}`),
+          api.get(`/api/data/intensity-by-topic?${params}`),
+          api.get(`/api/data/by-country?${params}`),
+          api.get(`/api/data/by-sector?${params}`),
+          api.get(`/api/data/intensity-by-region?${params}`),
         ])
 
         setExtraStats({

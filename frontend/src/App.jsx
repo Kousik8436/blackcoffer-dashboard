@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import './App.css'
-import axios from 'axios'
+import api from './api'
 import Sidebar from './components/Sidebar'
 import Topbar from './components/Topbar'
 import WelcomeBanner from './components/WelcomeBanner'
@@ -13,9 +13,6 @@ import PestleChart from './components/PestleChart'
 import CountryChart from './components/CountryChart'
 import SourceChart from './components/SourceChart'
 import ScatterChart from './components/ScatterChart'
-
-// Configure Axios to use the deployed backend URL, or localhost during development
-axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
 function App() {
   const [activePage, setActivePage] = useState('dashboard')
@@ -54,7 +51,7 @@ function App() {
   }
 
   useEffect(() => {
-    axios.get('/api/data/filters').then(res => {
+    api.get('/api/data/filters').then(res => {
       if (res.data.success) setFilterOptions(res.data.filters)
     }).catch(err => console.error(err))
   }, [])
@@ -62,7 +59,7 @@ function App() {
   useEffect(() => {
     setStatsLoading(true)
     const query = buildQuery(filters)
-    axios.get(`/api/data/stats?${query}`).then(res => {
+    api.get(`/api/data/stats?${query}`).then(res => {
       if (res.data.success) setStats(res.data.stats)
       setStatsLoading(false)
     }).catch(() => setStatsLoading(false))

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Bar } from 'react-chartjs-2'
-import axios from 'axios'
+import api from '../api'
 import {
   Chart as ChartJS,
   CategoryScale, LinearScale,
@@ -21,8 +21,7 @@ function PestleChart({ filters }) {
         Object.entries(filters).forEach(([k, v]) => {
           if (v && v !== 'all') params.append(k, v)
         })
-        const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
-        const res = await axios.get(`${API_URL}/api/data/by-pestle?${params}`)
+        const res = await api.get(`/api/data/by-pestle?${params}`)
         if (res.data.success && res.data.data.length > 0) {
           const items = res.data.data
           setChartData({
