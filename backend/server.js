@@ -15,18 +15,25 @@ const connectDB = async () => {
   if (mongoose.connection.readyState >= 1) return;
   try {
     await mongoose.connect(process.env.MONGO_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
       serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of hanging for 10s-30s
     });
     console.log('MongoDB Connected!');
   } catch (err) {
     console.log('MongoDB Connection Error:', err);
+    throw err;
   }
 };
 
 // Ensure DB is connected before handling any API requests
 app.use(async (req, res, next) => {
-  await connectDB();
-  next();
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Database connection failed' });
+  }
 });
 
 // Connect our routes
